@@ -1,1 +1,19 @@
-./build
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+
+# add
+.idea/
+.vscode/
+
+# personal
+*.log
+data/
