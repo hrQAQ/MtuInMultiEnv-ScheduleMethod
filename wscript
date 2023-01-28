@@ -145,6 +145,7 @@ def options(opt):
     opt.load('compiler_cxx')
     opt.load('cflags')
     opt.load('gnu_dirs')
+    opt.load('python')  # for python embedding
 
     opt.add_option('--check-config',
                    help=('Print the current configuration.'),
@@ -341,6 +342,10 @@ def print_config(env, phase='configure'):
         print("%-30s: %s%s%s" % (caption, Logs.colors(color), status, Logs.colors('NORMAL')))
 
 def configure(conf):
+    # check python
+    conf.load('compiler_c python')
+    conf.check_python_version((2,4,2))
+    conf.check_python_headers()
     conf.load('relocation', tooldir=['waf-tools'])
 
     # attach some extra methods
@@ -713,7 +718,7 @@ def create_suid_program(bld, name):
     return program
 
 def create_ns3_program(bld, name, dependencies=('core',)):
-    program = bld(features='cxx cxxprogram')
+    program = bld(features='cxx cxxprogram pyembed')    # for python embedding
 
     program.is_ns3_program = True
     program.name = name
@@ -760,6 +765,9 @@ def add_scratch_programs(bld):
             if filename.startswith('.') or filename == 'CVS':
                 continue
             if os.path.isdir(os.path.join("scratch", filename)):
+                # for python embedding
+                if filename == "__pycache__":
+                    continue
                 obj = bld.create_ns3_program(filename, all_modules)
                 obj.path = obj.path.find_dir('scratch').find_dir(filename)
                 obj.source = obj.path.ant_glob('*.cc')
@@ -1085,7 +1093,7 @@ def shutdown(ctx):
     # Write the build status file.
     build_status_file = os.path.join(bld.out_dir, 'build-status.py')
     out = open(build_status_file, 'w')
-    out.write('#! /usr/bin/env python\n')
+    out.write('#! /usr/bin/env python3\n')
     out.write('\n')
     out.write('# Programs that are runnable.\n')
     out.write('ns3_runnable_programs = ' + str(env['NS3_RUNNABLE_PROGRAMS']) + '\n')
