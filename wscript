@@ -342,10 +342,6 @@ def print_config(env, phase='configure'):
         print("%-30s: %s%s%s" % (caption, Logs.colors(color), status, Logs.colors('NORMAL')))
 
 def configure(conf):
-    # check python
-    conf.load('compiler_c python')
-    conf.check_python_version((2,4,2))
-    conf.check_python_headers()
     conf.load('relocation', tooldir=['waf-tools'])
 
     # attach some extra methods
