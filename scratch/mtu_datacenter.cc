@@ -31,6 +31,7 @@ std::string PROPOGATION_DELAY = "100us";  // 传播延迟
 std::string BANDWIDTH_LINK = "1Gbps";     // 链路带宽
 double LOSS_RATE = 0.0;                   // 丢包率
 double LOAD = 0.8;                        // 链路的负载状况
+int DYNAMIC = 0;                          // 是否动态修改MTU 0:不修改 1:修改
 
 using namespace ns3;
 
@@ -45,6 +46,7 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("LOSS_RATE", "丢包率", LOSS_RATE);
     cmd.AddValue("BANDWIDTH_LINK", "数据中心链路带宽", BANDWIDTH_LINK);
     cmd.AddValue("LOAD", "链路的负载状况", LOAD);
+    cmd.AddValue("DYNAMIC", "是否动态修改MTU", DYNAMIC);
     cmd.Parse(argc, argv);
 
     Time::SetResolution(Time::NS);                                                    // 设置最小时间单元 ns
