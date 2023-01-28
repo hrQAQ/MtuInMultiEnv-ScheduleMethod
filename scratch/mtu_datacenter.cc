@@ -1,25 +1,25 @@
-#include "ns3/core-module.h"
-#include "ns3/internet-module.h"
-#include "ns3/network-module.h"
-#include "ns3/point-to-point-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/core-module.h"
+#include "ns3/flow-monitor-module.h"
+#include "ns3/internet-module.h"
 #include "ns3/mtu-module.h"
 #include "ns3/mtu-utility.h"
-#include "ns3/ptr.h"
+#include "ns3/network-module.h"
 #include "ns3/node.h"
-#include "ns3/flow-monitor-module.h"
+#include "ns3/point-to-point-module.h"
+#include "ns3/ptr.h"
 
 #define START_TIME 0.0
 #define END_TIME 10
 
 // 128M
-#define BUFFER_SIZE 134217728
-#define MTU 9000
-#define MSS MTU - 40
-#define TCP_PROTOCOL "ns3::TcpNewReno"
+#define BUFFER_SIZE 134217728           // 设置TCP的发送缓冲区大小
+#define MTU 9000                        // 设置MTU
+#define MSS MTU - 40                    // 设置MSS
+#define TCP_PROTOCOL "ns3::TcpNewReno"  // 设置TCP协议
 
-#define PORT_START 1000
-#define PORT_END 65535
+#define PORT_START 1000  // 设置端口号 从非周知端口开始
+#define PORT_END 3999    // 设置端口号   到max端口结束
 
 // #define DATA_RATE "1Gbps"
 // #define PROPOGATION_DELAY "100us"
@@ -27,19 +27,19 @@
 // #define LOAD 2
 
 // cmd传参 全局变量用于ertern
-std::string PROPOGATION_DELAY = "100us";
-std::string BANDWIDTH_LINK = "1Gbps";
-double LOSS_RATE = 0.0;
-double LOAD = 0.8;
+std::string PROPOGATION_DELAY = "100us";  // 传播延迟
+std::string BANDWIDTH_LINK = "1Gbps";     // 链路带宽
+double LOSS_RATE = 0.0;                   // 丢包率
+double LOAD = 0.8;                        // 链路的负载状况
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("DataCenter");
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     LogComponentEnable("DataCenter", LOG_INFO);
-
+    LogComponentEnable("MtuNetDevice", LOG_INFO);
+    NS_LOG_INFO("DataCenter running...");
     CommandLine cmd;
     cmd.AddValue("DELAY", "延迟", PROPOGATION_DELAY);
     cmd.AddValue("LOSS_RATE", "丢包率", LOSS_RATE);
@@ -47,51 +47,50 @@ int main(int argc, char *argv[])
     cmd.AddValue("LOAD", "链路的负载状况", LOAD);
     cmd.Parse(argc, argv);
 
-    Time::SetResolution(Time::NS);
-    Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(BUFFER_SIZE));
-    Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(BUFFER_SIZE));
-    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(MSS));
-    Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue(TCP_PROTOCOL));
-    Config::SetDefault("ns3::PointToPointNetDevice::Mtu", UintegerValue(MTU));
+    Time::SetResolution(Time::NS);                                                    // 设置最小时间单元 ns
+    Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(BUFFER_SIZE));     // 设置TCP的发送缓冲区大小
+    Config::SetDefault("ns3::TcpSocket::RcvBufSize", UintegerValue(BUFFER_SIZE));     // 设置TCP的接收缓冲区大小
+    Config::SetDefault("ns3::TcpSocket::SegmentSize", UintegerValue(MSS));            // 设置MSS
+    Config::SetDefault("ns3::TcpL4Protocol::SocketType", StringValue(TCP_PROTOCOL));  // 设置TCP协议
+    Config::SetDefault("ns3::PointToPointNetDevice::Mtu", UintegerValue(MTU));        // 设置MTU
 
     // set the rto
     uint64_t rtt = Time(PROPOGATION_DELAY).GetNanoSeconds() * 8;
     double rto = Time(PROPOGATION_DELAY).GetSeconds() * 8 * 5;
     Config::SetDefault("ns3::TcpSocketBase::MinRto", TimeValue(Seconds(rto)));
 
-    //generate cdf table
-    std::string cdfFileName = "./scratch/DCTCP_CDF.txt";
-    struct cdf_table *cdfTable = new cdf_table();
-    MtuUtility::init_cdf(cdfTable);
-    MtuUtility::load_cdf(cdfTable, cdfFileName.c_str());
+    // generate cdf table
+    std::string cdfFileName = "./scratch/DCTCP_CDF.txt";  // CDF文件路径
+    struct cdf_table *cdfTable = new cdf_table();         // 生成cdf表
+    MtuUtility::init_cdf(cdfTable);                       // 初始化cdf表
+    MtuUtility::load_cdf(cdfTable, cdfFileName.c_str());  // 读取cdf文件
 
-    // string FCT file name
+    // string FCT file name FCT(dc)_$(propogation_delay)_$(bandwidth)_$(loss_rate)_$(load)
     std::string FCT_fileName = std::string("FCT(dc)_").append(PROPOGATION_DELAY).append(std::string("_")).append(BANDWIDTH_LINK).append(std::string("_"));
     FCT_fileName = FCT_fileName.append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD));
 
     // std::cout << FCT_fileName << std::endl;
 
-    //leaf spine topology
-    NodeContainer spines,
-        leafs, ends;
+    // leaf spine topology
+    NodeContainer spines, leafs, ends;
     spines.Create(4);
     leafs.Create(4);
     ends.Create(32);
 
-    //install stack
+    // install stack 安装协议栈
     InternetStackHelper stackHelper;
     stackHelper.Install(spines);
     stackHelper.Install(leafs);
     stackHelper.Install(ends);
 
-    //forwarding delay in switches, half for each netdevice
-    //1968 nanoseconds for 10G prots, 4587 nanoseconds for GE ports, 5928nanoseconds for 100M ports
-    uint32_t delay = 4587;
+    // forwarding delay in switches, half for each netdevice
+    // 1968 nanoseconds for 10G prots, 4587 nanoseconds for GE ports, 5928nanoseconds for 100M ports
+    // uint32_t delay = 4587;  // 这个delay是Switch的存储转发延迟
 
     MtuNetHelper netHelper;
 
-    netHelper.SetDeviceAttribute("DataRate", StringValue(BANDWIDTH_LINK));
-    netHelper.SetChannelAttribute("Delay", StringValue(PROPOGATION_DELAY));
+    netHelper.SetDeviceAttribute("DataRate", StringValue(BANDWIDTH_LINK));   // 设置链路带宽
+    netHelper.SetChannelAttribute("Delay", StringValue(PROPOGATION_DELAY));  // 设置传播延迟
     netHelper.data_fileName = FCT_fileName;
     netHelper.rtt = rtt;
 
@@ -152,7 +151,7 @@ int main(int argc, char *argv[])
     NetDeviceContainer devices_l3s3 = netHelper.InstallMtuNetDevices(leafs.Get(3), spines.Get(3), LOSS_RATE);
 
     Ipv4AddressHelper ipv4Helper;
-    //assign ip for spines and leafs
+    // assign ip for spines and leafs
 
     ipv4Helper.SetBase("10.1.1.0", "255.255.255.0");
     Ipv4InterfaceContainer interface_l0s0 = ipv4Helper.Assign(devices_l0s0);
@@ -259,7 +258,7 @@ int main(int argc, char *argv[])
     Ipv4InterfaceContainer interface_e31l3 = ipv4Helper.Assign(devices_e31l3);
 
     double request_rate = LOAD * DataRate(BANDWIDTH_LINK).GetBitRate() / (8 * MtuUtility::avg_cdf(cdfTable));
-    std::cout << request_rate << std::endl;
+    // std::cout << request_rate << std::endl;
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
     std::vector<Ipv4Address> dstAddress;
@@ -299,14 +298,12 @@ int main(int argc, char *argv[])
     uint32_t flowCount = 0;
     uint64_t bandwidth = DataRate(BANDWIDTH_LINK).GetBitRate();
     double delay_prop = double(Time(PROPOGATION_DELAY).GetMicroSeconds()) / 1000;
-    double delay_process, delay_tx, delay_rx = 0;
+    double delay_process = 0, delay_tx = 0, delay_rx = 0;
     double end_gen_time = 64535.0 / request_rate / 32;
 
-    netHelper.InstallAllApplicationsInDC(ends, ends, request_rate, cdfTable, dstAddress, flowCount, PORT_START, PORT_END, START_TIME, END_TIME, end_gen_time,
-                                         bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
-    //     netHelper.InstallAllApplications(ends, ends, request_rate, cdfTable,
-    //                                      dstAddress, flowCount, PORT_START, PORT_END, MSS, START_TIME, END_TIME, END_TIME, bandwidth, delay_prop);
-    std::cout << "flow count is" << flowCount << std::endl;
+    netHelper.InstallAllApplicationsInDC(ends, ends, request_rate, cdfTable, dstAddress, flowCount, PORT_START, PORT_END, START_TIME, END_TIME, end_gen_time, bandwidth, delay_prop,
+                                         delay_process, delay_tx, delay_rx);
+    std::cout << "Total flow count number: " << flowCount << std::endl;
 
     Ptr<FlowMonitor> flowMonitor;
     FlowMonitorHelper flowHelper;
@@ -314,59 +311,12 @@ int main(int argc, char *argv[])
     Simulator::Stop(Seconds(END_TIME));
     Simulator::Run();
 
+    std::cout << "FlowMonitor SerializeToXmlFile" << std::endl;
     flowMonitor->CheckForLostPackets();
-    flowMonitor->SerializeToXmlFile("data/leaf-spine/multiqueue.xml", true, true);
+    flowMonitor->SerializeToXmlFile("data/SRPT/" + FCT_fileName, true, true);
 
     Simulator::Destroy();
     MtuUtility::free_cdf(cdfTable);
 
     return 0;
-
-    // NetDeviceContainer devices_l0;
-    // devices_l0.Add(devices_e0l0);
-    // devices_l0.Add(devices_e1l0);
-    // devices_l0.Add(devices_e2l0);
-    // devices_l0.Add(devices_e3l0);
-    // devices_l0.Add(devices_e4l0);
-    // devices_l0.Add(devices_e5l0);
-    // devices_l0.Add(devices_e6l0);
-    // devices_l0.Add(devices_e7l0);
-    // ipv4Helper.SetBase("10.2.1.0", "255.255.255.0");
-    // Ipv4InterfaceContainer interface_l0 = ipv4Helper.Assign(devices_l0);
-
-    // NetDeviceContainer devices_l1;
-    // devices_l1.Add(devices_e8l1);
-    // devices_l1.Add(devices_e9l1);
-    // devices_l1.Add(devices_e10l1);
-    // devices_l1.Add(devices_e11l1);
-    // devices_l1.Add(devices_e12l1);
-    // devices_l1.Add(devices_e13l1);
-    // devices_l1.Add(devices_e14l1);
-    // devices_l1.Add(devices_e15l1);
-    // ipv4Helper.SetBase("10.2.2.0", "255.255.255.0");
-    // Ipv4InterfaceContainer interface_l1 = ipv4Helper.Assign(devices_l1);
-
-    // NetDeviceContainer devices_l2;
-    // devices_l2.Add(devices_e16l2);
-    // devices_l2.Add(devices_e17l2);
-    // devices_l2.Add(devices_e18l2);
-    // devices_l2.Add(devices_e19l2);
-    // devices_l2.Add(devices_e20l2);
-    // devices_l2.Add(devices_e21l2);
-    // devices_l2.Add(devices_e22l2);
-    // devices_l2.Add(devices_e23l2);
-    // ipv4Helper.SetBase("10.2.3.0", "255.255.255.0");
-    // Ipv4InterfaceContainer interface_l2 = ipv4Helper.Assign(devices_l2);
-
-    // NetDeviceContainer devices_l3;
-    // devices_l3.Add(devices_e24l3);
-    // devices_l3.Add(devices_e25l3);
-    // devices_l3.Add(devices_e26l3);
-    // devices_l3.Add(devices_e27l3);
-    // devices_l3.Add(devices_e28l3);
-    // devices_l3.Add(devices_e29l3);
-    // devices_l3.Add(devices_e30l3);
-    // devices_l3.Add(devices_e31l3);
-    // ipv4Helper.SetBase("10.2.4.0", "255.255.255.0");
-    // Ipv4InterfaceContainer interface_l3 = ipv4Helper.Assign(devices_l3);
 }
