@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     MtuUtility::init_cdf(cdfTable);
     MtuUtility::load_cdf(cdfTable, cdfFileName.c_str());
 
-    // filename
+    // filename FCT(mix)_$(propogation_delay)_$(WAN_PROPOGATION_DELAY)_$(ES_BANDWIDTH)_$(BANDWIDTH_LINK)_$(LOSS_RATE)_$(LOAD)
     std::string FCT_fileName = std::string("FCT(mix)_").append(PROPOGATION_DELAY).append(WAN_PROPOGATION_DELAY).append(std::string("_")).append(ES_BANDWIDTH).append(std::string("_"));
     FCT_fileName = FCT_fileName.append(std::string("_")).append(BANDWIDTH_LINK).append(std::string("_")).append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD));
 
@@ -407,9 +407,17 @@ int main(int argc, char *argv[])
     netHelper.InstallAllApplicationsInMix(ends, dstNodes, request_rate, cdfTable, dstAddress, flowCount, PORT_START, PORT_END, START_TIME, END_TIME, end_gen_time, bandwidth,
                                           bandwidth_wan, delay_prop, delay_prop_wan, delay_process, delay_process,
                                           switches_wan.GetN(), delay_tx, delay_rx, "dc");
+    std::cout << "Total flow count number: " << flowCount << std::endl;
 
+    Ptr<FlowMonitor> flowMonitor;
+    FlowMonitorHelper flowHelper;
+    flowMonitor = flowHelper.InstallAll();
     Simulator::Stop(Seconds(END_TIME));
     Simulator::Run();
+
+    std::cout << "FlowMonitor SerializeToXmlFile" << std::endl;
+    flowMonitor->CheckForLostPackets();
+    flowMonitor->SerializeToXmlFile("data/mix/SRPT/" + FCT_fileName, true, true);
 
     Simulator::Destroy();
     MtuUtility::free_cdf(cdfTable);
