@@ -93,7 +93,7 @@ void MtuNetHelper::InstallAllApplicationsInDC(NodeContainer fromServers, NodeCon
             applications.Start(Seconds(startTime));
             applications.Stop(Seconds(timesim_end));
             if (schedule_method == "SRPT") {
-                Simulator::Schedule(NanoSeconds(1), &MtuBulkSendApplication::updateMTUandPriInDc, DynamicCast<MtuBulkSendApplication>(applications.Get(0)), bandwidth, delay_prop,
+                Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInDc, DynamicCast<MtuBulkSendApplication>(applications.Get(0)), bandwidth, delay_prop,
                                     delay_process, delay_tx, delay_rx);
             }
             startTime += MtuUtility::poission_gen_interval(requestRate);
@@ -290,8 +290,6 @@ NetDeviceContainer MtuNetHelper::InstallMtuNetDevices(Ptr<Node> loss_node, Ptr<N
     dev_b->SetAddress(Mac48Address::Allocate());
     dev_b->data_fileName = data_fileName;
     dev_b->rtt = rtt;
-    // Ptr<MultiQueue> queueB = m_queueFactory.Create<MultiQueue>();
-    // queueB->SetMaxPackets(100);
     Ptr<MultiQueue> queueB = m_queueFactory.Create<MultiQueue>();
     queueB->SetMaxPackets(100);
     dev_b->SetQueue(queueB);

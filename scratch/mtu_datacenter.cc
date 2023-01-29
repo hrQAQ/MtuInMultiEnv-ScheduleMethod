@@ -316,7 +316,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "FlowMonitor SerializeToXmlFile" << std::endl;
     flowMonitor->CheckForLostPackets();
-    flowMonitor->SerializeToXmlFile("data/"+ SCHEDULE_METHOD + "/" + FCT_fileName, true, true);
+    flowMonitor->SerializeToXmlFile("data/dc/"+ SCHEDULE_METHOD + "/" + FCT_fileName, true, true);
 
     Simulator::Destroy();
     MtuUtility::free_cdf(cdfTable);

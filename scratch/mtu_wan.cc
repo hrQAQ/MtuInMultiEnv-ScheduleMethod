@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     MtuUtility::init_cdf(cdfTable);
     MtuUtility::load_cdf(cdfTable, cdfFileName.c_str());
 
-    // fct filename
+    // fct filename FCT(wan)_$(propogation_delay)_$(ES_BANDWIDTH)_$(LOSS_RATE)_$(load)
     std::string FCT_fileName = std::string("FCT(wan)_").append(PROPOGATION_DELAY).append(std::string("_")).append(ES_BANDWIDTH).append(std::string("_"));
     FCT_fileName = FCT_fileName.append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD));
 
@@ -157,9 +157,17 @@ int main(int argc, char *argv[])
                                             flowCount, PORT_START, PORT_END, START_TIME, END_TIME, end_gen_time, bandwidth,
                                             switches.GetN(), delay_prop, delay_process, delay_tx, delay_rx);
 
-    std::cout << flowCount << std::endl;
+    std::cout << "Total flow count number: " << flowCount << std::endl;
+
+    Ptr<FlowMonitor> flowMonitor;
+    FlowMonitorHelper flowHelper;
+    flowMonitor = flowHelper.InstallAll();
     Simulator::Stop(Seconds(END_TIME));
     Simulator::Run();
+
+    std::cout << "FlowMonitor SerializeToXmlFile" << std::endl;
+    flowMonitor->CheckForLostPackets();
+    flowMonitor->SerializeToXmlFile("data/wan/SRPT/" + FCT_fileName, true, true);
 
     Simulator::Destroy();
     MtuUtility::free_cdf(cdfTable);

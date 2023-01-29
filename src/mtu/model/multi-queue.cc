@@ -24,9 +24,7 @@ namespace ns3
         std::vector<double> weight;
         weight.push_back(0.7);
         weight.push_back(0.3);
-
         m_weight = weight;
-        // std::cout << "refereced here" << std::endl;
         SetNumPriority(3, weight);
     }
 

@@ -225,5 +225,5 @@ void MtuBulkSendApplication::updateMTUandPriInDc(uint64_t bandwidth, double dela
     this->SetPriority(priority);
     this->SetSegmentSize(size);
     // std::cout << "RTT: " << RTT << std::endl;
-    Simulator::Schedule(MicroSeconds(500), &MtuBulkSendApplication::updateMTUandPriInDc, this, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
+    Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInDc, this, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
 }
