@@ -45,9 +45,9 @@ ApplicationContainer MtuNetHelper::InstallApplication(Ptr<Node> sendNode, Ptr<No
 
     Ptr<MtuBulkSendApplication> sendApplication = m_sendApplicationFactory.Create<MtuBulkSendApplication>();
     sendApplication->SetPriority(priority);
-    sendApplication->SetSequenceNumber(flowCount);
+    sendApplication->SetSequenceNumber(flowCount);  // 设置流的序号
     sendApplication->SetNdBandwidth(bandwidth);
-    // sendApplication->SetSegmentSize(sendSize);
+    sendApplication->SetSegmentSize(sendSize);  // 设置每个segment的大小
     sendNode->AddApplication(sendApplication);
 
     m_sinkApplicationFactory.Set("Protocol", StringValue("ns3::TcpSocketFactory"));
@@ -58,22 +58,22 @@ ApplicationContainer MtuNetHelper::InstallApplication(Ptr<Node> sendNode, Ptr<No
 
     applications.Add(sendApplication);
     applications.Add(sinkApplication);
-
     return applications;
 }
 
 // install applications in different enviroments
 void MtuNetHelper::InstallAllApplicationsInDC(NodeContainer fromServers, NodeContainer destServers, double requestRate, struct cdf_table *cdfTable,
                                               std::vector<Ipv4Address> destAddress, uint32_t &flowCount, int port_start, int port_end, double timesim_start, double timesim_end,
-                                              double time_flow_launch_end, uint64_t bandwidth, double delay_prop, double delay_process, double delay_tx, double delay_rx) {
+                                              double time_flow_launch_end, uint64_t bandwidth, double delay_prop, double delay_process, double delay_tx, double delay_rx,
+                                              std::string schedule_method) {
     int src_leaf_node_count = fromServers.GetN();
     int dst_leaf_node_count = destServers.GetN();
     uint16_t port = port_start;
     for (int i = 0; i < src_leaf_node_count; i++) {
         double startTime = timesim_start + MtuUtility::poission_gen_interval(requestRate);  // 加泊松分布
         while (startTime < time_flow_launch_end) {
-            flowCount++;
             if (port > port_end) break;
+            flowCount++;
             int destIndex = MtuUtility::rand_range(0, dst_leaf_node_count - 1);
             // generate flowsize base on the cdf
             uint32_t flowSize = MtuUtility::gen_random_cdf(cdfTable);
@@ -92,11 +92,10 @@ void MtuNetHelper::InstallAllApplicationsInDC(NodeContainer fromServers, NodeCon
 
             applications.Start(Seconds(startTime));
             applications.Stop(Seconds(timesim_end));
-            // applications.Get(0)->SetStartTime(Seconds(startTime));
-            // applications.Get(0)->SetStopTime(Seconds(timesim_end));
-            // applications.Get(1)->SetStartTime(Seconds(timesim_start));
-            // applications.Get(1)->SetStopTime(Seconds(timesim_end));
-
+            if (schedule_method == "SRPT") {
+                Simulator::Schedule(NanoSeconds(1), &MtuBulkSendApplication::updateMTUandPriInDc, DynamicCast<MtuBulkSendApplication>(applications.Get(0)), bandwidth, delay_prop,
+                                    delay_process, delay_tx, delay_rx);
+            }
             startTime += MtuUtility::poission_gen_interval(requestRate);
             port++;
         }
@@ -114,8 +113,8 @@ void MtuNetHelper::InstallAllApplicationsInWAN(NodeContainer fromServers, NodeCo
     for (int i = 0; i < src_leaf_node_count; i++) {
         double startTime = timesim_start + MtuUtility::poission_gen_interval(requestRate);  // 加泊松分布
         while (startTime < time_flow_launch_end) {
+            if (port > port_end) break;  // 跳出判断需要在最开始完成，否则flowcount会错误计数
             flowCount++;
-            if (port > port_end) break;
             int destIndex = MtuUtility::rand_range(0, dst_leaf_node_count - 1);
             // generate flowsize base on the cdf
             uint32_t flowSize = MtuUtility::gen_random_cdf(cdfTable);
@@ -160,8 +159,8 @@ void MtuNetHelper::InstallAllApplicationsInMix(NodeContainer fromServers, NodeCo
     for (int i = 0; i < src_leaf_node_count; i++) {
         double startTime = timesim_start + MtuUtility::poission_gen_interval(requestRate);  // 加泊松分布
         while (startTime < time_flow_launch_end) {
-            flowCount++;
             if (port > port_end) break;
+            flowCount++;
             int destIndex = MtuUtility::rand_range(0, dst_leaf_node_count - 1);
             // generate flowsize base on the cdf
             uint32_t flowSize = MtuUtility::gen_random_cdf(cdfTable);
@@ -215,40 +214,42 @@ void MtuNetHelper::SetChannelAttribute(std::string n1, const AttributeValue &v1)
     m_remoteChannelFactory.Set(n1, v1);
 }
 
+// InstallNormalNetDevices 用于安装普通的网络设备
 NetDeviceContainer MtuNetHelper::InstallNormalNetDevices(Ptr<Node> a, Ptr<Node> b) {
-    NetDeviceContainer container;
-    Ptr<MtuNetDevice> dev_a = m_mtuDeviceFactory.Create<MtuNetDevice>();
-    dev_a->setLossRate(0);
-    dev_a->SetAddress(Mac48Address::Allocate());
-    dev_a->data_fileName = data_fileName;
-    dev_a->rtt = rtt;
-    Ptr<MultiQueue> queueA = m_queueFactory.Create<MultiQueue>();
-    queueA->SetMaxPackets(100);
-    dev_a->SetQueue(queueA);
+    NetDeviceContainer container;                                         // 用于存储安装的网络设备
+    Ptr<MtuNetDevice> dev_a = m_mtuDeviceFactory.Create<MtuNetDevice>();  // 创建一个网络设备
+    dev_a->setLossRate(0);                                                // 设置丢包率为0
+    dev_a->SetAddress(Mac48Address::Allocate());                          // 分配一个MAC地址
+    dev_a->data_fileName = data_fileName;                                 // 设置数据文件名
+    dev_a->rtt = rtt;                                                     // 设置RTT
+    Ptr<MultiQueue> queueA = m_queueFactory.Create<MultiQueue>();         // 创建一个队列
+    queueA->SetMaxPackets(100);                                           // 设置队列的最大包数
+    dev_a->SetQueue(queueA);                                              // 设置网络设备的队列
 
-    Ptr<MtuNetDevice> dev_b = m_mtuDeviceFactory.Create<MtuNetDevice>();
-    dev_b->setLossRate(0);
-    dev_b->SetAddress(Mac48Address::Allocate());
-    dev_b->data_fileName = data_fileName;
-    dev_b->rtt = rtt;
-    Ptr<MultiQueue> queueB = m_queueFactory.Create<MultiQueue>();
-    // queueB->SetMaxPackets(100);
-    dev_b->SetQueue(queueB);
+    Ptr<MtuNetDevice> dev_b = m_mtuDeviceFactory.Create<MtuNetDevice>();  // 创建一个网络设备
+    dev_b->setLossRate(0);                                                // 设置丢包率为0
+    dev_b->SetAddress(Mac48Address::Allocate());                          // 分配一个MAC地址
+    dev_b->data_fileName = data_fileName;                                 // 设置数据文件名
+    dev_b->rtt = rtt;                                                     // 设置RTT
+    Ptr<MultiQueue> queueB = m_queueFactory.Create<MultiQueue>();         // 创建一个队列
+    queueB->SetMaxPackets(100);
+    dev_b->SetQueue(queueB);  // 设置网络设备的队列
 
-    bool useNormalChannel = true;
-    Ptr<PointToPointChannel> channel = 0;
+    bool useNormalChannel = true;          // 是否使用普通的通道
+    Ptr<PointToPointChannel> channel = 0;  // 通道
 
-    if (MpiInterface::IsEnabled()) {
-        uint32_t n1SystemId = a->GetSystemId();
-        uint32_t n2SystemId = b->GetSystemId();
-        uint32_t currSystemId = MpiInterface::GetSystemId();
-        if (n1SystemId != currSystemId || n2SystemId != currSystemId) {
+    // TODO 决定是否使用普通的通道 没有理解SYSID的作用
+    if (MpiInterface::IsEnabled()) {                                     // 如果启用了MPI MPI是一个并行计算的接口
+        uint32_t n1SystemId = a->GetSystemId();                          // 获取节点a的系统ID
+        uint32_t n2SystemId = b->GetSystemId();                          // 获取节点b的系统ID
+        uint32_t currSystemId = MpiInterface::GetSystemId();             // 获取当前系统的ID
+        if (n1SystemId != currSystemId || n2SystemId != currSystemId) {  // 如果节点a或者节点b的系统ID不等于当前系统的ID
             useNormalChannel = false;
         }
     }
-    if (useNormalChannel) {
+    if (useNormalChannel) {  // 如果使用普通的通道，那么就创建一个普通P2P通道
         channel = m_channelFactory.Create<PointToPointChannel>();
-    } else {
+    } else {  // 如果不使用普通的通道，那么就创建一个远程P2P通道
         channel = m_remoteChannelFactory.Create<PointToPointRemoteChannel>();
         Ptr<MpiReceiver> mpiRecA = CreateObject<MpiReceiver>();
         Ptr<MpiReceiver> mpiRecB = CreateObject<MpiReceiver>();

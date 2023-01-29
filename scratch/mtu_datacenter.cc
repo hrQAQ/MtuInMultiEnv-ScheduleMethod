@@ -19,7 +19,7 @@
 #define TCP_PROTOCOL "ns3::TcpNewReno"  // 设置TCP协议
 
 #define PORT_START 1000  // 设置端口号 从非周知端口开始
-#define PORT_END 3999    // 设置端口号   到max端口结束
+#define PORT_END 1100    // 设置端口号   到max端口结束
 
 // #define DATA_RATE "1Gbps"
 // #define PROPOGATION_DELAY "100us"
@@ -31,7 +31,7 @@ std::string PROPOGATION_DELAY = "100us";  // 传播延迟
 std::string BANDWIDTH_LINK = "1Gbps";     // 链路带宽
 double LOSS_RATE = 0.0;                   // 丢包率
 double LOAD = 0.8;                        // 链路的负载状况
-int DYNAMIC = 0;                          // 是否动态修改MTU 0:不修改 1:修改
+std::string SCHEDULE_METHOD = "SRPT";     // 调度算法 1. FCFS 2. SRPT 3. RR 4. SJF
 
 using namespace ns3;
 
@@ -40,14 +40,15 @@ NS_LOG_COMPONENT_DEFINE("DataCenter");
 int main(int argc, char *argv[]) {
     LogComponentEnable("DataCenter", LOG_INFO);
     LogComponentEnable("MtuNetDevice", LOG_INFO);
-    NS_LOG_INFO("DataCenter running...");
     CommandLine cmd;
     cmd.AddValue("DELAY", "延迟", PROPOGATION_DELAY);
     cmd.AddValue("LOSS_RATE", "丢包率", LOSS_RATE);
     cmd.AddValue("BANDWIDTH_LINK", "数据中心链路带宽", BANDWIDTH_LINK);
     cmd.AddValue("LOAD", "链路的负载状况", LOAD);
-    cmd.AddValue("DYNAMIC", "是否动态修改MTU", DYNAMIC);
+    cmd.AddValue("SCHEDULE_METHOD", "调度算法", SCHEDULE_METHOD);
     cmd.Parse(argc, argv);
+
+    std::cout << "DataCenter running with SCHEDULE_METHOD " << SCHEDULE_METHOD << std::endl;
 
     Time::SetResolution(Time::NS);                                                    // 设置最小时间单元 ns
     Config::SetDefault("ns3::TcpSocket::SndBufSize", UintegerValue(BUFFER_SIZE));     // 设置TCP的发送缓冲区大小
@@ -304,7 +305,7 @@ int main(int argc, char *argv[]) {
     double end_gen_time = 64535.0 / request_rate / 32;
 
     netHelper.InstallAllApplicationsInDC(ends, ends, request_rate, cdfTable, dstAddress, flowCount, PORT_START, PORT_END, START_TIME, END_TIME, end_gen_time, bandwidth, delay_prop,
-                                         delay_process, delay_tx, delay_rx);
+                                         delay_process, delay_tx, delay_rx, SCHEDULE_METHOD);
     std::cout << "Total flow count number: " << flowCount << std::endl;
 
     Ptr<FlowMonitor> flowMonitor;
@@ -315,7 +316,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "FlowMonitor SerializeToXmlFile" << std::endl;
     flowMonitor->CheckForLostPackets();
-    flowMonitor->SerializeToXmlFile("data/SRPT/" + FCT_fileName, true, true);
+    flowMonitor->SerializeToXmlFile("data/"+ SCHEDULE_METHOD + "/" + FCT_fileName, true, true);
 
     Simulator::Destroy();
     MtuUtility::free_cdf(cdfTable);

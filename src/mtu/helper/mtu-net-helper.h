@@ -26,7 +26,7 @@ public:
     void InstallAllApplicationsInDC(NodeContainer fromServers, NodeContainer destServers, double requestRate, struct cdf_table *cdfTable,
                                     std::vector<Ipv4Address> destAddress, uint32_t &flowCount, int port_start, int port_end, double timesim_start,
                                     double timesim_end, double time_flow_launch_end, uint64_t bandwidth, double delay_prop, double delay_process,
-                                    double delay_tx, double delay_rx);
+                                    double delay_tx, double delay_rx, std::string schedule_method);
     void InstallAllApplicationsInWAN(NodeContainer fromServers, NodeContainer destServers, double requestRate, struct cdf_table *cdfTable,
                                      std::vector<Ipv4Address> destAddress, uint32_t &flowCount, int port_start, int port_end, double timesim_start,
                                      double timesim_end, double time_flow_launch_end, uint64_t bandwidth, int numOfSwitches, double delay_prop,
