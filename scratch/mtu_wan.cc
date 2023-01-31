@@ -19,7 +19,7 @@
 #define TCP_PROTOCOL "ns3::TcpNewReno"
 
 #define PORT_START 1000
-#define PORT_END 65535
+#define PORT_END 1001
 
 // #define LOSS_RATE 0.0
 // #define PROPOGATION_DELAY "100us"
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     // Set the default rto
     uint64_t rtt = Time(PROPOGATION_DELAY).GetNanoSeconds() * 8;
     double rto = Time(PROPOGATION_DELAY).GetSeconds() * 8 * 5;
-    std::cout << Time(PROPOGATION_DELAY).GetSeconds() << " " << rto << std::endl;
+    // std::cout << Time(PROPOGATION_DELAY).GetSeconds() << " " << rto << std::endl;
     Config::SetDefault("ns3::TcpSocketBase::MinRto", TimeValue(Seconds(rto)));
 
     // generate cdf table
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     // fct filename FCT(wan)_$(propogation_delay)_$(ES_BANDWIDTH)_$(LOSS_RATE)_$(load)
     std::string FCT_fileName = std::string("FCT(wan)_").append(PROPOGATION_DELAY).append(std::string("_")).append(ES_BANDWIDTH).append(std::string("_"));
-    FCT_fileName = FCT_fileName.append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD));
+    FCT_fileName = FCT_fileName.append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD)).append(std::string(".xml"));
 
     NodeContainer from_servers, dst_servers, switches;
     from_servers.Create(4);

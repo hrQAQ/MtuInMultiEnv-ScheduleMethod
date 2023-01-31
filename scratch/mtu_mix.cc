@@ -21,7 +21,7 @@
 #define NUM_WAN_SWITCHES 4
 
 #define PORT_START 1000
-#define PORT_END 100000
+#define PORT_END 1001
 
 // #define PROPOGATION_DELAY "100us"
 // #define WAN_PROPOGATION_DELAY "2ms"
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
     // filename FCT(mix)_$(propogation_delay)_$(WAN_PROPOGATION_DELAY)_$(ES_BANDWIDTH)_$(BANDWIDTH_LINK)_$(LOSS_RATE)_$(LOAD)
     std::string FCT_fileName = std::string("FCT(mix)_").append(PROPOGATION_DELAY).append(WAN_PROPOGATION_DELAY).append(std::string("_")).append(ES_BANDWIDTH).append(std::string("_"));
-    FCT_fileName = FCT_fileName.append(std::string("_")).append(BANDWIDTH_LINK).append(std::string("_")).append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD));
+    FCT_fileName = FCT_fileName.append(std::string("_")).append(BANDWIDTH_LINK).append(std::string("_")).append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD)).append(std::string(".xml"));
 
     //Datacenter topology
     NodeContainer spines, leafs, ends;

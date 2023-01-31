@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     // string FCT file name FCT(dc)_$(propogation_delay)_$(bandwidth)_$(loss_rate)_$(load)
     std::string FCT_fileName = std::string("FCT(dc)_").append(PROPOGATION_DELAY).append(std::string("_")).append(BANDWIDTH_LINK).append(std::string("_"));
-    FCT_fileName = FCT_fileName.append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD));
+    FCT_fileName = FCT_fileName.append(std::to_string(LOSS_RATE)).append(std::string("_")).append(std::to_string(LOAD)).append(std::string(".xml"));
 
     // std::cout << FCT_fileName << std::endl;
 
