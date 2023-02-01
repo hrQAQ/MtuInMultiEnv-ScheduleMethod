@@ -20,7 +20,7 @@ namespace ns3
         virtual Ptr<Packet> Dequeue(void);
         virtual Ptr<Packet> Remove(void);
         virtual Ptr<const Packet> Peek(void) const;
-        void SetNumPriority(uint16_t pri_number, std::vector<double> weight);
+        void SetNumPriority(uint16_t pri_number);
         // return the size in bytes
         uint32_t GetTotalNumber(void);
 
@@ -31,7 +31,6 @@ namespace ns3
 
         //priority queues
         std::vector<std::queue<Ptr<Packet>>> m_queues;
-        std::vector<double> m_weight;
     };
 
 } // namespace ns3

@@ -177,21 +177,7 @@ MtuUtility::gen_requestRate(double load, double link_capacity, struct cdf_table 
 
 int MtuUtility::gen_priority(int flowsize)
 {
-    int priority;
-    //0-100k 0 100k-10M 1 10M- 2
-    if (flowsize < 102400)
-    {
-        priority = 0;
-    }
-    else if (flowsize < 10485760)
-    {
-        priority = 1;
-    }
-    else
-    {
-        priority = 2;
-    }
-    return priority;
+    return 1;
 }
 
 double MtuUtility::gen_random()
