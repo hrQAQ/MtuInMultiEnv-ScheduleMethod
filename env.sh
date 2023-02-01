@@ -1,0 +1,1 @@
+export LD_LIBRARY_PATH=/home/huangrui/MtuInMultiEnv-ScheduleMethod/build/
