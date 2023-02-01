@@ -144,7 +144,7 @@ void MtuBulkSendApplication::SendData() {
             toSend = std::min(toSend, m_maxBytes - m_totBytes);
         }
         NS_LOG_LOGIC("sending packet at " << Simulator::Now());
-        std::cout << "sending packet with size " << toSend << " at " << Simulator::Now() << std::endl;
+        // std::cout << "sending packet with size " << toSend << " at " << Simulator::Now() << std::endl;
         Ptr<Packet> packet = Create<Packet>(toSend);
 
         PriorityTag tag;
@@ -198,7 +198,7 @@ void MtuBulkSendApplication::DataSend(Ptr<Socket>, uint32_t) {
 }
 
 /**
- * Schedule回调函数，定时根据流的剩余大小修改流的MTU和Priority
+ * DataCenter环境下 Schedule回调函数，定时根据流的剩余大小修改流的MTU和Priority
  */
 void MtuBulkSendApplication::updateMTUandPriInDc(uint64_t bandwidth, double delay_prop, double delay_process, double delay_tx, double delay_rx) {
     // std::cout << "update at " << Simulator::Now() << std::endl;
@@ -212,11 +212,25 @@ void MtuBulkSendApplication::updateMTUandPriInDc(uint64_t bandwidth, double dela
     MtuDecision *md = new MtuDecision();
     int bestMtu = md->FindBestMtuInDC(remainBytes, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
     size = bestMtu - 40;
-    // double trans_delay = (bestMtu + 38) * 8 / bandwidth * 1000;
-    // double RTT = md->ComputeRTTInDC(delay_prop, trans_delay, delay_process);
-    // std::cout << "updateMTUandPriInDc bestMtu " << bestMtu << " bestSize " << size << " priority " << priority << std::endl;
     this->SetPriority(priority);
     this->SetSegmentSize(size);
-    // std::cout << "RTT: " << RTT << std::endl;
     Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInDc, this, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
+}
+
+/**
+ * WAN环境下 Schedule回调函数，定时根据流的剩余大小修改流的MTU和Priority
+ */
+void MtuBulkSendApplication::updateMTUandPriInWan(int numOfSwitches, uint64_t bandwidth, int delay_prop, int delay_process, int delay_tx, int delay_rx) {
+    uint64_t remainBytes = m_maxBytes - m_totBytes;
+    // select the best sendsize
+    // generate priority base on the remain flowsize
+    uint32_t priority = 0;
+    priority = MtuUtility::gen_priority(remainBytes);
+    int size = 1460;
+    MtuDecision *md = new MtuDecision();
+    int bestMtu = md->FindBestMtuInWAN(remainBytes, numOfSwitches, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
+    size = bestMtu - 40;
+    this->SetPriority(priority);
+    this->SetSegmentSize(size);
+    Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInWan, this, numOfSwitches, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
 }

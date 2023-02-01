@@ -51,6 +51,7 @@ class MtuBulkSendApplication : public Application {
      * Schedule回调函数，定时根据流的剩余大小修改流的MTU和Priority
      */
     void updateMTUandPriInDc(uint64_t bandwidth, double delay_prop, double delay_process, double delay_tx, double delay_rx);
+    void updateMTUandPriInWan(int numOfSwitches, uint64_t bandwidth, int delay_prop, int delay_process, int delay_tx, int delay_rx);
 
    protected:
     virtual void DoDispose(void);

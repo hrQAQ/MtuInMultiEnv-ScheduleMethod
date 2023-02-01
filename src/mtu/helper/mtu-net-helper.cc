@@ -122,11 +122,11 @@ void MtuNetHelper::InstallAllApplicationsInWAN(NodeContainer fromServers, NodeCo
             uint32_t priority = 0;
             priority = MtuUtility::gen_priority(flowSize);
 
-            std::string file_path = "./data/wangen_flow_";
-            file_path = file_path.append(std::to_string(bandwidth / 1000000));
-            file_path = file_path.append(std::string("Mbps.csv"));
-            std::ofstream file(file_path, std::ios::app);
-            file << startTime << "," << flowSize << "\n";
+            // std::string file_path = "./data/wangen_flow_";
+            // file_path = file_path.append(std::to_string(bandwidth / 1000000));
+            // file_path = file_path.append(std::string("Mbps.csv"));
+            // std::ofstream file(file_path, std::ios::app);
+            // file << startTime << "," << flowSize << "\n";
 
             // select the best sendsize
             int size = 1460;
@@ -141,6 +141,8 @@ void MtuNetHelper::InstallAllApplicationsInWAN(NodeContainer fromServers, NodeCo
             applications.Get(0)->SetStopTime(Seconds(timesim_end));
             applications.Get(1)->SetStartTime(Seconds(timesim_start));
             applications.Get(1)->SetStopTime(Seconds(timesim_end));
+            Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInWan, DynamicCast<MtuBulkSendApplication>(applications.Get(0)), numOfSwitches, bandwidth,
+                                delay_prop, delay_process, delay_tx, delay_rx);
 
             startTime += MtuUtility::poission_gen_interval(requestRate);
             port++;
