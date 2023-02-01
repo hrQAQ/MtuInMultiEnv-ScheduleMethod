@@ -148,8 +148,6 @@ void MtuBulkSendApplication::SendData() {
         Ptr<Packet> packet = Create<Packet>(toSend);
 
         PriorityTag tag;
-        // if (m_totBytes == 0)
-        m_priority = 2;
         tag.SetTimeStamp(t_start);
         tag.SetPriorityTag(m_priority);
         tag.SetFLowsizeTag(m_maxBytes);
@@ -157,11 +155,6 @@ void MtuBulkSendApplication::SendData() {
         tag.SetSeqTag(seq_num);
         tag.SetBandwidth(m_bandwidth);
         packet->AddPacketTag(tag);
-
-        // std::cout << "im from tag " << tag.GetPriorityTag() << std::endl;
-        // PriorityTag tag2;
-        // packet->PeekPacketTag(tag2);
-        // std::cout << "from tag2 maxbytes " << m_maxBytes << "tag " << tag2.GetFlowsizeTag() << std::endl;
 
         int actual = m_socket->Send(packet);
         if (actual > 0) {
