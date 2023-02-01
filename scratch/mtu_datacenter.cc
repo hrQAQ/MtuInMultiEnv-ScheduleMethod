@@ -10,7 +10,7 @@
 #include "ns3/ptr.h"
 
 #define START_TIME 0.0
-#define END_TIME 10
+#define END_TIME 100000
 
 // 128M
 #define BUFFER_SIZE 134217728           // 设置TCP的发送缓冲区大小

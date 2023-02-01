@@ -10,7 +10,7 @@
 #include "ns3/flow-monitor-module.h"
 
 #define START_TIME 0.0
-#define END_TIME 1000
+#define END_TIME 100000
 
 // 128M
 #define BUFFER_SIZE 134217728
@@ -19,7 +19,7 @@
 #define TCP_PROTOCOL "ns3::TcpNewReno"
 
 #define PORT_START 1000
-#define PORT_END 1010
+#define PORT_END 3000
 
 // #define LOSS_RATE 0.0
 // #define PROPOGATION_DELAY "100us"

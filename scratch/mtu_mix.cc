@@ -10,7 +10,7 @@
 #include "ns3/flow-monitor-module.h"
 
 #define START_TIME 0.0
-#define END_TIME 10
+#define END_TIME 100000
 
 // 128M
 #define BUFFER_SIZE 134217728
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     //forwarding delay in switches, half for each netdevice
     //1968 nanoseconds for 10G prots, 4587 nanoseconds for GE ports, 5928nanoseconds for 100M ports
     // netHelper.SetDeviceAttribute("Mtu", UintegerValue(MTU));
-    uint32_t delay = 4587;
+    // uint32_t delay = 4587;
     MtuNetHelper netHelper;
     netHelper.data_fileName = FCT_fileName;
     netHelper.rtt = rtt;

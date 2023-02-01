@@ -144,7 +144,7 @@ void MtuBulkSendApplication::SendData() {
             toSend = std::min(toSend, m_maxBytes - m_totBytes);
         }
         NS_LOG_LOGIC("sending packet at " << Simulator::Now());
-        // std::cout << "sending packet with size " << toSend << " at " << Simulator::Now() << std::endl;
+        std::cout << "sending packet with size " << toSend << " at " << Simulator::Now() << std::endl;
         Ptr<Packet> packet = Create<Packet>(toSend);
 
         PriorityTag tag;
