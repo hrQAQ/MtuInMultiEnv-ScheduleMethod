@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
     uint32_t flowCount = 0;
     uint64_t bandwidth = DataRate(BANDWIDTH_LINK).GetBitRate();
     double delay_prop = double(Time(PROPOGATION_DELAY).GetMicroSeconds()) / 1000;
-    double delay_process = 0, delay_tx = 0, delay_rx = 0;
+    double delay_process = 0.0, delay_tx = 0.0, delay_rx = 0.0;
     double end_gen_time = 64535.0 / request_rate / 32;
 
     netHelper.InstallAllApplicationsInDC(ends, ends, request_rate, cdfTable, dstAddress, flowCount, PORT_START, PORT_END, START_TIME, END_TIME, end_gen_time, bandwidth, delay_prop,
