@@ -19,7 +19,7 @@
 #define TCP_PROTOCOL "ns3::TcpNewReno"
 
 #define PORT_START 1000
-#define PORT_END 3000
+#define PORT_END 1005
 
 // #define LOSS_RATE 0.0
 // #define PROPOGATION_DELAY "100us"
