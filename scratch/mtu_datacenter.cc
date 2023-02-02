@@ -16,10 +16,10 @@
 #define BUFFER_SIZE 134217728           // 设置TCP的发送缓冲区大小
 #define MTU 9000                        // 设置MTU
 #define MSS MTU - 40                    // 设置MSS
-#define TCP_PROTOCOL "ns3::TcpNewReno"  // 设置TCP协议
+#define TCP_PROTOCOL "ns3::TcpCubic"  // 设置TCP协议
 
 #define PORT_START 1000  // 设置端口号 从非周知端口开始
-#define PORT_END 1005    // 设置端口号   到max端口结束
+#define PORT_END 1999    // 设置端口号   到max端口结束
 
 // #define DATA_RATE "1Gbps"
 // #define PROPOGATION_DELAY "100us"
