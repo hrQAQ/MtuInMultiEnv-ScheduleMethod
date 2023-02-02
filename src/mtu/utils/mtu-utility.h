@@ -55,8 +55,8 @@ public:
 
     static double gen_requestRate(double load, double link_capacity, struct cdf_table *table);
 
-    /*assign priority according to the flow size*/
-    static int gen_priority(int flowsize);
+    /*assign priority according to the mtu*/
+    static int gen_priority(int mtu);
 
     static double gen_random();
 };

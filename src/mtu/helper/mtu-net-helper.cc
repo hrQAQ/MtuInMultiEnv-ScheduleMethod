@@ -77,15 +77,16 @@ void MtuNetHelper::InstallAllApplicationsInDC(NodeContainer fromServers, NodeCon
             int destIndex = MtuUtility::rand_range(0, dst_leaf_node_count - 1);
             // generate flowsize base on the cdf
             uint32_t flowSize = MtuUtility::gen_random_cdf(cdfTable);
-            // generate priority base on the flowsize
-            uint32_t priority = 0;
-            priority = MtuUtility::gen_priority(flowSize);
 
             // select the best sendsize
             int size = 1460;
             MtuDecision *md = new MtuDecision();
             int bestMtu = md->FindBestMtuInDC(flowSize, bandwidth, delay_prop, delay_process, delay_tx, delay_rx);
             size = bestMtu - 40;
+
+            // generate priority base on the mtu
+            uint32_t priority = 0;
+            priority = MtuUtility::gen_priority(bestMtu);
 
             ApplicationContainer applications;
             applications = InstallApplication(fromServers.Get(i), destServers.Get(destIndex), destAddress[destIndex], port, flowSize, size, priority, flowCount, bandwidth);

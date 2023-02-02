@@ -18,14 +18,18 @@ namespace ns3
     }
 
     MultiQueue::MultiQueue()
-        : pri_number(3)
+        : pri_number(7)
     {
         // NS_LOG_FUNCTION(this);
         std::vector<double> weight;
-        weight.push_back(0.7);
-        weight.push_back(0.3);
+        weight.push_back(0.6872);
+        weight.push_back(0.1678);
+        weight.push_back(0.0639);
+        weight.push_back(0.03796);
+        weight.push_back(0.02688);
+        weight.push_back(0.01622);
         m_weight = weight;
-        SetNumPriority(3, weight);
+        SetNumPriority(7, weight);
     }
 
     MultiQueue::~MultiQueue()
@@ -60,26 +64,6 @@ namespace ns3
             {
                 std::queue<Ptr<Packet>> single_queue;
                 m_queues.push_back(single_queue);
-            }
-        }
-        else if (current_number > pri_number)
-        {
-            std::vector<Ptr<Packet>> vecTemp;
-            uint16_t indexStart = pri_number;
-            for (uint16_t i = indexStart; i < current_number; i++)
-            {
-                std::queue<Ptr<Packet>> queTemp = m_queues[i];
-                while (queTemp.size() > 0)
-                {
-                    vecTemp.push_back(queTemp.front());
-                    queTemp.pop();
-                }
-            }
-            m_queues.resize(pri_number);
-            std::queue<Ptr<Packet>> queBack = m_queues.back();
-            for (uint32_t i = 0; i < vecTemp.size(); i++)
-            {
-                queBack.push(vecTemp[i]);
             }
         }
     }
