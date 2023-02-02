@@ -16,7 +16,7 @@
 #define BUFFER_SIZE 134217728
 #define MTU 9000
 #define MSS MTU - 40
-#define TCP_PROTOCOL "ns3::TcpNewReno"
+#define TCP_PROTOCOL "ns3::TcpCubic"
 
 #define PORT_START 1000
 #define PORT_END 3000
