@@ -10,7 +10,7 @@
 #include "ns3/ptr.h"
 
 #define START_TIME 0.0
-#define END_TIME 100000
+#define END_TIME 200000
 
 // 128M
 #define BUFFER_SIZE 134217728           // 设置TCP的发送缓冲区大小
@@ -19,7 +19,7 @@
 #define TCP_PROTOCOL "ns3::TcpNewReno"  // 设置TCP协议
 
 #define PORT_START 1000  // 设置端口号 从非周知端口开始
-#define PORT_END 1100    // 设置端口号   到max端口结束
+#define PORT_END 1999    // 设置端口号   到max端口结束
 
 // #define DATA_RATE "1Gbps"
 // #define PROPOGATION_DELAY "100us"
