@@ -93,10 +93,10 @@ void MtuNetHelper::InstallAllApplicationsInDC(NodeContainer fromServers, NodeCon
 
             applications.Start(Seconds(startTime));
             applications.Stop(Seconds(timesim_end));
-            if (schedule_method == "SRPT") {
-                Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInDc, DynamicCast<MtuBulkSendApplication>(applications.Get(0)), bandwidth, delay_prop,
-                                    delay_process, delay_tx, delay_rx);
-            }
+            // if (schedule_method == "SRPT") {
+            //     Simulator::Schedule(Seconds(1.0), &MtuBulkSendApplication::updateMTUandPriInDc, DynamicCast<MtuBulkSendApplication>(applications.Get(0)), bandwidth, delay_prop,
+            //                         delay_process, delay_tx, delay_rx);
+            // }
             startTime += MtuUtility::poission_gen_interval(requestRate);
             port++;
         }
