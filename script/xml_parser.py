@@ -194,7 +194,7 @@ class Simulation(object):
 
 def main(argv):
     file_obj = open(argv[1])
-    print("Reading XML file success...")
+    # print("Reading XML file success...")
     EndPort=int(argv[2])
     StartPort=1000
 
@@ -212,15 +212,15 @@ def main(argv):
                 elem.clear() # won't need this any more
                 # sys.stdout.write(".")
                 sys.stdout.flush()
-    print("parse process done...")
+    # print("parse process done...")
     totolFlow=0
     totolFlowCompletionTime=0
     for sim in sim_list:
         for flow in sim.flows:
             t = flow.fiveTuple
             proto = {6: 'TCP', 17: 'UDP'} [t.protocol]
-            print("FlowID: %i (%s %s/%s --> %s/%i)" % \
-                (flow.flowId, proto, t.sourceAddress, t.sourcePort, t.destinationAddress, t.destinationPort))
+            # print("FlowID: %i (%s %s/%s --> %s/%i)" % \
+            #     (flow.flowId, proto, t.sourceAddress, t.sourcePort, t.destinationAddress, t.destinationPort))
             # if flow.txBitrate is None:
             #     print("\tTX bitrate: None")
             # else:
@@ -238,14 +238,17 @@ def main(argv):
             # else:
             #     print("\tPacket Loss Ratio: %.2f %%" % (flow.packetLossRatio*100))
             if flow.flowCompletionTime is None:
-                print("\tFlow Completion Time: None")
+                pass
+                # print("\tFlow Completion Time: None")
             elif t.sourcePort > EndPort:
-                print("\tFlow Completion Time(not added to FCT): %.2f ns" % (flow.flowCompletionTime,))
+                pass
+                # print("\tFlow Completion Time(not added to FCT): %.2f ns" % (flow.flowCompletionTime,))
             elif t.sourcePort <= EndPort and t.sourcePort >= StartPort:
-                print("\tFlow Completion Time: %.2f ns" % (flow.flowCompletionTime,))
+                # print("\tFlow Completion Time: %.2f ns" % (flow.flowCompletionTime,))
                 totolFlow+=1
                 totolFlowCompletionTime+=flow.flowCompletionTime
-    print("AVG FCT: %.2f ns" % (totolFlowCompletionTime/totolFlow))
+    # print("AVG FCT: %.2f ns" % (totolFlowCompletionTime/totolFlow))
+    return totolFlowCompletionTime/totolFlow
 
 # python xml_parser.py ../data/RR/FCT(dc)_$(propogation_delay)_$(bandwidth)_$(loss_rate)_$(load).xml $(EndPort)
 if __name__ == '__main__':

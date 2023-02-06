@@ -9,7 +9,7 @@ for Method in 'SRPT' 'FCFS' 'SJF' 'RR'
         do
             for bandwidth in '10Gbps' '25Gbps' '40Gbps' 
             do
-                for load in '0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7' '0.8' '0.9' '1.0'
+                for load in '0.3' '0.4' '0.5' '0.6' '0.7' '0.8' '0.9'
                 do {
                         echo "Running mtu datacenter with delay=$delay, loss_rate=$loss_rate, bandwidth=$bandwidth, load=$load, schedule_method=$Method"
                         ./waf --run "mtu_datacenter --DELAY=$delay --LOSS_RATE=$loss_rate --BANDWIDTH_LINK=$bandwidth --LOAD=$load --SCHEDULE_METHOD=$Method"
