@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     Config::SetDefault("ns3::TcpSocketBase::MinRto", TimeValue(Seconds(rto)));
 
     // generate cdf table
-    std::string cdfFileName = "./scratch/DCTCP_CDF.txt";  // CDF文件路径
+    std::string cdfFileName = "./scratch/DataMining_CDF.txt";  // CDF文件路径
     struct cdf_table *cdfTable = new cdf_table();         // 生成cdf表
     MtuUtility::init_cdf(cdfTable);                       // 初始化cdf表
     MtuUtility::load_cdf(cdfTable, cdfFileName.c_str());  // 读取cdf文件

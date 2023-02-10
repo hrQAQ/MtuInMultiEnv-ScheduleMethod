@@ -1,11 +1,11 @@
 #!/bin/bash
 echo "start program at: `date`"
 # ./waf --run "mtu_datacenter --DELAY=5us --LOSS_RATE=0 --BANDWIDTH_LINK=10Gbps --LOAD=0.2 --SCHEDULE_METHOD=SRPT"
-# for Method in 'SRPT' 'FCFS' 'SJF' 'RR'
+for Method in 'SRPT' 'FCFS' 'SJF' 'RR'
 Method='FCFS'
 for delay in '5us'; do 
     for bandwidth in '10Gbps' '25Gbps' '40Gbps'; do
-        for loss_rate in '0' '0.001' '0.005' '0.01' '0.05'; do
+        for loss_rate in '0.01' '0.02' '0.03' '0.04' '0.05'; do
             for load in '0.3' '0.4' '0.5' '0.6' '0.7' '0.8' '0.9' ; do  
             joblist=($(jobs -p))
             while (( ${#joblist[*]} >= 54 )); do
